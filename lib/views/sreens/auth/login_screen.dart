@@ -1,13 +1,71 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intec_social/views/sreens/auth/forgot_password.dart';
+import 'package:intec_social/views/sreens/auth/register_screen.dart';
+
+
+import '../../../controllers/auth/auth_controller.dart';
+import '../home_screen.dart'; // Importa el AuthController
 
 class LoginPage extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthController _authController = AuthController(); // Instancia del AuthController
 
+  void login(BuildContext context) async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-  void login ()async{
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, completa todos los campos')),
+      );
+      return;
+    }
 
-
+    try {
+      User? user = await _authController.loginWithEmailAndPassword(email, password);
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Inicio de sesión exitoso')),
+        );
+        // Navegar a la pantalla principal o realizar otra acción
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error en el inicio de sesión')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
+
+  void loginWithGoogle(BuildContext context) async {
+    try {
+      User? user = await _authController.loginWithGoogle();
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Inicio de sesión con Google exitoso')),
+        );
+        // Navegar a la pantalla principal o realizar otra acción
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error en el inicio de sesión con Google')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,13 +77,10 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Logo
-              // Image.asset(
-              //   'assets/images/instagram_logo.png', // Asegúrate de agregar este logo en tu carpeta de assets
-              //   height: 64,
-              // ),
               SizedBox(height: 32),
               // Email Input
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Correo electrónico',
                   border: OutlineInputBorder(
@@ -39,6 +94,7 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 16),
               // Password Input
               TextField(
+                controller: _passwordController,
                 decoration: InputDecoration(
                   hintText: 'Contraseña',
                   border: OutlineInputBorder(
@@ -54,7 +110,7 @@ class LoginPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {}, // Añade la lógica de inicio de sesión aquí
+                  onPressed: () => login(context), // Lógica de inicio de sesión
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
@@ -77,9 +133,11 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 16),
               // Forgot Password
               GestureDetector(
-                onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return ForgotPasswordPage();
-                },));}, // Añade la lógica de recuperación de contraseña aquí
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ForgotPasswordPage();
+                  }));
+                },
                 child: Text(
                   '¿Olvidaste tu contraseña?',
                   style: TextStyle(
@@ -107,13 +165,9 @@ class LoginPage extends StatelessWidget {
               // Sign in with Google
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {}, // Añade la lógica de inicio con Google aquí
-                  // icon: Image.asset(
-                  //   'assets/images/google_icon.png', // Asegúrate de agregar este ícono en tu carpeta de assets
-                  //   height: 24,
-                  // ),
-                  label: Text(
+                child: OutlinedButton(
+                  onPressed: () => loginWithGoogle(context), // Lógica de inicio con Google
+                  child: Text(
                     'Inicia sesión con Google',
                     style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
@@ -133,7 +187,12 @@ class LoginPage extends StatelessWidget {
                   Text('¿No tienes una cuenta?'),
                   SizedBox(width: 4),
                   GestureDetector(
-                    onTap: () {}, // Añade la lógica de registro aquí
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RegisterPage()),
+                      );
+                    },
                     child: Text(
                       'Regístrate',
                       style: TextStyle(

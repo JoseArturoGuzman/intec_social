@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../controllers/auth/auth_controller.dart';
 import 'login_screen.dart';
 
@@ -13,6 +12,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _surnameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -33,11 +35,16 @@ class _RegisterPageState extends State<RegisterPage> {
       _passwordController.text.trim(),
     );
 
-    setState(() {
-      _isLoading = false;
-    });
-
     if (user != null) {
+      // Guardar datos adicionales en Firestore
+      await _authController.updateUserData(user.uid, {
+        'name': _nameController.text.trim(),
+        'surname': _surnameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'email': _emailController.text.trim(),
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Usuario registrado con éxito.')),
       );
@@ -47,6 +54,10 @@ class _RegisterPageState extends State<RegisterPage> {
         SnackBar(content: Text('Error al registrar el usuario.')),
       );
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -59,12 +70,47 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo
-              // Image.asset(
-              //   'assets/images/instagram_logo.png',
-              //   height: 64,
-              // ),
               SizedBox(height: 32),
+              // Name Input
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  hintText: 'Nombre',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Surname Input
+              TextField(
+                controller: _surnameController,
+                decoration: InputDecoration(
+                  hintText: 'Apellido',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+              ),
+              SizedBox(height: 16),
+              // Phone Input
+              TextField(
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  hintText: 'Teléfono',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              SizedBox(height: 16),
               // Email Input
               TextField(
                 controller: _emailController,

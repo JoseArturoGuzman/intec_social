@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intec_social/views/sreens/auth/login_screen.dart';
 import 'package:intec_social/views/sreens/auth/register_screen.dart';
+import 'package:intec_social/views/sreens/home_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -40,7 +42,31 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: RegisterPage(),
+      home: AuthCheck(),
+    );
+  }
+}
+
+class AuthCheck extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          // Si el usuario está autenticado, navega a HomeScreen
+          return HomeScreen();
+        } else {
+          // Si el usuario no está autenticado, navega a LoginScreen
+          return LoginPage();
+        }
+      },
     );
   }
 }
